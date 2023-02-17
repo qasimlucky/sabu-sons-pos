@@ -11,7 +11,7 @@ function CategoriesList() {
   const [itemOffset, setItemOffset] = useState(0);
 
     useEffect(() => {
-      axios.get("/stock/get/categories").then(Response =>{
+      axios.get("https://subo-sons-backend.onrender.com/stock/get/categories").then(Response =>{
         console.log(Response.data)
         setData(Response.data)
       }).catch(err =>{

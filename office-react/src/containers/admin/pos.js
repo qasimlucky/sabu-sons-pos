@@ -1,13 +1,14 @@
 import React,{ useEffect, useState } from "react";
 import  { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
+import { useNavigate } from 'react-router-dom';
 import {useLocation} from 'react-router-dom';
 import axios from "axios";
 import Calculator from "awesome-react-calculator";
 import { BsFillPlusSquareFill } from "react-icons/bs";
 import { BsDashSquareFill } from "react-icons/bs";
 import { BsXLg } from "react-icons/bs";
-import { BsCurrencyDollar } from "react-icons/bs";
+import { BsGridFill } from "react-icons/bs";
 import { BsCalculator } from "react-icons/bs";
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content';
@@ -17,6 +18,7 @@ function PointOfSale(props) {
     const MySwal = withReactContent(Swal)
     const [authername, setAutherName] = useState([{}])
     const [categoryname, setCategoryName] = useState([{}])
+    const [agentname, setAgentName] = useState([{}])
     const [customerbill, setCustomerBill] = useState([])
     const [billtotal, setBillTotal] = useState(0)
     const [billdiscount, setBillDiscount] = useState(0)
@@ -26,7 +28,17 @@ function PointOfSale(props) {
     const [numberofbillitem, setNumberOfBillItem] = useState(0)
     const [savebill, setSaveBill] = useState([])
     const [isprintbill, setIsPrintBill] = useState(false);
-    const [iseditmode, setIsEditMode] = useState(false)
+    const [iseditmode, setIsEditMode] = useState(false);
+    const [billAccordingWholeSalePrice, setBillAccordingWholeSalePrice] = useState(false);
+    const [billwithoutheader, setBillWithOut] = useState(false);
+    const [agent, setAgent] = useState();
+    const [agentpercentage, setAgentPrecentage] = useState();
+    const [customerphonenumber, setCustomerPhoneNumber] = useState("0000-000000");
+    const [customername, setCustomerName] = useState("Customer");
+    const [customerreturnamount, setCustomerReturnAmount] = useState(0);
+    
+    
+    let navigate = useNavigate();
     //Edit bill
       //Edit bill
    /*    const location = useLocation();
@@ -56,7 +68,7 @@ function PointOfSale(props) {
     const time = current.toLocaleTimeString();
     
     useEffect(() => {
-      axios.get("/stock/get").then(Response =>{
+      axios.get("https://subo-sons-backend.onrender.com/stock/get").then(Response =>{
         console.log(Response.data)
         setData(Response.data)
       }).catch(err =>{
@@ -74,7 +86,7 @@ function PointOfSale(props) {
     }
       // All Auther list name
       useEffect(() => {
-        axios.get("/stock/get/authername").then(Response =>{
+        axios.get("https://subo-sons-backend.onrender.com/stock/get/authername").then(Response =>{
           console.log(Response.data)
           setAutherName(Response.data)
         }).catch(err =>{
@@ -83,13 +95,23 @@ function PointOfSale(props) {
         },[]);
 
         useEffect(() => {
-            axios.get("/stock/get/categoryname").then(Response =>{
+            axios.get("https://subo-sons-backend.onrender.com/stock/get/categoryname").then(Response =>{
               console.log(Response.data)
               setCategoryName(Response.data)
             }).catch(err =>{
               console.log(err)
             })
             },[]);
+
+            //agent data
+            useEffect(() => {
+                axios.get("http://localhost:8000/agent/get").then(Response =>{
+                  console.log(Response.data)
+                  setAgentName(Response.data)
+                }).catch(err =>{
+                  console.log(err)
+                })
+                },[]);
 
       useEffect(() => { // this hook will get called every time myArr has changed
         // perform some action every time myArr is updated
@@ -100,7 +122,7 @@ function PointOfSale(props) {
      function handle(e) {
         var authers=e.target.value
         axios
-            .post("/stock/get/auther", {auther:authers})
+            .post("https://subo-sons-backend.onrender.com/stock/get/auther", {auther:authers})
             .then(res => {
               console.log(res.data)
               setData(res.data)
@@ -113,7 +135,7 @@ function PointOfSale(props) {
         var categories=e.target.value
         console.log(e.target.value)
         axios
-            .post("/stock/get/categorybook", {categories:categories})
+            .post("https://subo-sons-backend.onrender.com/stock/get/categorybook", {categories:categories})
             .then(res => {
               console.log(res.data)
               setData(res.data)
@@ -121,27 +143,49 @@ function PointOfSale(props) {
                 console.log(err)
             })
       }
+      // customer
+      function handlecustomer(e){
+        if(e.target.id == "customer_name"){
+            setCustomerName(e.target.value) 
+            console.log(customername)
+        }else{
+            setCustomerPhoneNumber(e.target.value)
+            console.log(customerphonenumber)
+        }
+        
+      }
      //Bill
       function Bill(stockDetails){
-       // console.log('this is from bill')
-        //var item = customerbill.find(item => item.stock_id == "ss-stock-1");
        var  objIndex = customerbill.findIndex((obj => obj.stock_id == stockDetails.stock_id));
-        //console.log(objIndex)
-        if(objIndex !== -1){ 
-            customerbill[objIndex].sell_quantity = (customerbill[objIndex].sell_quantity+1)
-            customerbill[objIndex].sub_total = (customerbill[objIndex].sale_price * (customerbill[objIndex].sell_quantity))
-            setCustomerBill([...customerbill])
-            /* setCustomerBill([...customerbill], () => {
-                
-             }) */
+       if(billAccordingWholeSalePrice){
+            if(objIndex !== -1){ 
+                customerbill[objIndex].sell_quantity = (customerbill[objIndex].sell_quantity+1)
+                customerbill[objIndex].sub_total = (customerbill[objIndex].whole_sale_price * (customerbill[objIndex].sell_quantity))
+                setCustomerBill([...customerbill])
+            }else{
+                stockDetails.sell_quantity = 1;
+                stockDetails.bill_item_Price = stockDetails.whole_sale_price;
+                stockDetails.sub_total = stockDetails.whole_sale_price;
+                customerbill.push(stockDetails)
+                setCustomerBill([...customerbill])
+            }
 
-        }else{
-            stockDetails.sell_quantity = 1;
-            stockDetails.bill_item_Price = stockDetails.sale_price;
-            stockDetails.sub_total = stockDetails.sale_price;
-            customerbill.push(stockDetails)
-            setCustomerBill([...customerbill])
-        }
+       }else{
+            if(objIndex !== -1){ 
+                customerbill[objIndex].sell_quantity = (customerbill[objIndex].sell_quantity+1)
+                customerbill[objIndex].sub_total = (customerbill[objIndex].sale_price * (customerbill[objIndex].sell_quantity))
+                setCustomerBill([...customerbill])
+            }else{
+                stockDetails.sell_quantity = 1;
+                stockDetails.bill_item_Price = stockDetails.sale_price;
+                stockDetails.sub_total = stockDetails.sale_price;
+                customerbill.push(stockDetails)
+                setCustomerBill([...customerbill])
+            }
+       }
+
+
+
 
     }
     async function DeleteitemFromBill(Bill){
@@ -149,20 +193,38 @@ function PointOfSale(props) {
      }
      function DecreaseQuantity(Bill){
         var  objIndex = customerbill.findIndex((obj => obj.stock_id == Bill.stock_id));
-        if(customerbill[objIndex].sell_quantity >=2){
-            customerbill[objIndex].sell_quantity = (customerbill[objIndex].sell_quantity-1)
-            customerbill[objIndex].sub_total = (customerbill[objIndex].sub_total-customerbill[objIndex].sale_price )
-            setCustomerBill([...customerbill])
+        if(billAccordingWholeSalePrice){
+            if(customerbill[objIndex].sell_quantity >=2){
+                customerbill[objIndex].sell_quantity = (customerbill[objIndex].sell_quantity-1)
+                customerbill[objIndex].sub_total = (customerbill[objIndex].sub_total-customerbill[objIndex].whole_sale_price )
+                setCustomerBill([...customerbill])
+            }else{
+                setCustomerBill(customerbill.filter(emp => emp.stock_id !== Bill.stock_id))
+            }
         }else{
-            setCustomerBill(customerbill.filter(emp => emp.stock_id !== Bill.stock_id))
+            if(customerbill[objIndex].sell_quantity >=2){
+                customerbill[objIndex].sell_quantity = (customerbill[objIndex].sell_quantity-1)
+                customerbill[objIndex].sub_total = (customerbill[objIndex].sub_total-customerbill[objIndex].whole_sale_price )
+                setCustomerBill([...customerbill])
+            }else{
+                setCustomerBill(customerbill.filter(emp => emp.stock_id !== Bill.stock_id))
+            }
         }
+
 
      }
      function IncreaseQuantity(Bill){
         var  objIndex = customerbill.findIndex((obj => obj.stock_id == Bill.stock_id));
-        customerbill[objIndex].sell_quantity = (customerbill[objIndex].sell_quantity+1)
-        customerbill[objIndex].sub_total = (customerbill[objIndex].sale_price * (customerbill[objIndex].sell_quantity))
-        setCustomerBill([...customerbill])
+        if(billAccordingWholeSalePrice){
+            customerbill[objIndex].sell_quantity = (customerbill[objIndex].sell_quantity+1)
+            customerbill[objIndex].sub_total = (customerbill[objIndex].whole_sale_price * (customerbill[objIndex].sell_quantity))
+            setCustomerBill([...customerbill])
+        }else{
+            customerbill[objIndex].sell_quantity = (customerbill[objIndex].sell_quantity+1)
+            customerbill[objIndex].sub_total = (customerbill[objIndex].sale_price * (customerbill[objIndex].sell_quantity))
+            setCustomerBill([...customerbill])
+        }
+
      }
 
      function TotalBillAmount(){
@@ -194,14 +256,18 @@ function PointOfSale(props) {
     try{
         setIsPrintBill(true)
         console.log("add cash")
-        console.log(customerbill)
-        console.log(savebill)
+       // console.log(customerbill)
+       // console.log(savebill)
         var billObject = {
             bill_items : customerbill,
             bill_total: billtotal,
             bill_discount:billdiscount,
             bill_tax:billtax,
-            bill_shipping:billshipping
+            bill_shipping:billshipping,
+            agent:agent,
+            agentpercentage:agentpercentage,
+            customer_name : customername,
+            customer_phone_number : customerphonenumber
         }
         savebill.push(billObject)
         console.log("this is save bill")
@@ -220,6 +286,7 @@ function PointOfSale(props) {
             showConfirmButton: false,
             timer: 1500
           })
+          window.location.reload(false);
         }).catch(err =>{
             console.log(err)
             Swal.fire({
@@ -326,32 +393,82 @@ function PointOfSale(props) {
 
       }
 
+function SaleType (e){
+    console.log(e.target.value)
+    if(e.target.value == "whole_sale_price"){
+        setBillAccordingWholeSalePrice(true)
+    }else{
+        setBillAccordingWholeSalePrice(false)
+    }
+    console.log(billAccordingWholeSalePrice)
+}
 
-        
-        
+function BillType (e){
+    console.log(e.target.value)
+    if(e.target.value == "with_out_header"){
+        setBillWithOut(true)
+    }else{
+        setBillWithOut(false)
+    }
+    console.log(billwithoutheader)
+}
 
+function handleAgent(e){
+console.log(e.target.value)
+setAgent(e.target.value)
+}
+function handleAgentPercentage(e){
+    console.log(e.target.value)
+    setAgentPrecentage(e.target.value)
+}
+function handleCashIn(e){
+   
+    setCustomerReturnAmount((parseInt(e.target.value)-billtotal))
+}
 
     return (
         <>
             <div class="popup requires-no-scroll">
-                <div className="pos-header" style={{display:"flex", flexWrap:"nowrap"}}> 
-                    <div style={{display:"flex", width:"50%", height:"35px",}}>
+                <div className="pos-header" style={{display:"flex", flexWrap:"nowrap", background:"black", color:"#FFDF00"}}> 
+                    <div style={{display:"flex", width:"70%", height:"35px",}}>
                         <div style={{marginLeft:"10px", display:"flex", alignContent:"center",alignItems:"center"}}>
-                            <b>Location:</b>
-                            <div className="dealer-selector" >
-                                <div class="form-group" style={{margin:"2px", width:"200px"}}>
-                                    <select class="form-control" style={{height:"30px", padding:'5px', border:"1px solid"}}>
-                                        <option>Lahore</option>
-                                        <option>Karachi</option>
-                                        <option>Islamabad</option>
-                                    </select>
+                                <b>Location:</b>
+                                <div className="dealer-selector" >
+                                    <div class="form-group" style={{margin:"2px", width:"150px"}}>
+                                        <select class="form-control" style={{height:"30px", padding:'5px', border:"1px solid"}}>
+                                            <option>Lahore</option>
+                                            <option>Karachi</option>
+                                            <option>Islamabad</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            </div>
+                        </div>
                         <div style={{marginLeft:"15px", display:"flex", alignContent:"center",alignItems:"center"}}><b>Date: </b> {date}</div>
+                        <div style={{marginLeft:"10px", display:"flex", alignContent:"center",alignItems:"center"}}>
+                                <b>Sale Type:</b>
+                                <div className="dealer-selector" >
+                                    <div class="form-group" style={{margin:"2px", width:"150px"}}>
+                                        <select onChange={(e) => SaleType(e)} class="form-control" style={{height:"30px", padding:'5px', border:"1px solid"}}>
+                                            <option value="sale_price" >Retail Price</option>
+                                            <option value = "whole_sale_price">Whole Sale</option>
+                                        </select>
+                                    </div>
+                                </div>
+                        </div>
+                        <div style={{marginLeft:"10px", display:"flex", alignContent:"center",alignItems:"center"}}>
+                                <b>Bill Format:</b>
+                                <div className="dealer-selector" >
+                                    <div class="form-group" style={{margin:"2px", width:"150px"}}>
+                                        <select onChange={(e) => BillType(e)} class="form-control" style={{height:"30px", padding:'5px', border:"1px solid"}}>
+                                            <option value="header" >With Header</option>
+                                            <option value = "with_out_header">WithOut Header</option>
+                                        </select>
+                                    </div>
+                                </div>
+                        </div>
                         {/* <div style={{marginLeft:"15px", display:"flex", alignContent:"center",alignItems:"center"}}><b>Time: </b>{time}</div> */}
                     </div>
-                    <div style={{display:"flex", width:"50%",height:"35px", alignContent:"center"}}>
+                    <div style={{display:"flex", width:"30%",height:"35px", alignContent:"center"}}>
                         <div style={{width:"80%"}}></div>
                         <div style={{height:"250px" ,width:"25%"}}>
                             
@@ -362,51 +479,90 @@ function PointOfSale(props) {
                                 
                             )}    
                         </div>
+                        
                         <div style={{display:"flex" , alignContent:"center", alignItems:"center", marginRight:"5px"}}>
                                 <BsCalculator onClick={()=>OpenCalculator()}/>
                         </div>
+                        <div style={{display:"flex" , alignContent:"center", alignItems:"center", marginRight:"5px"}}>
+                                <BsGridFill onClick={()=>navigate("/dashboard")}/>
+                        </div>
+                        
                     </div>
                 </div>
                 <div className="pos-flex-container">
                     {/* bill container */}
-                    <div className="pos-header bg-info pos-bill-container">
-                        <div className="bill-header">
-                            <div className="dealer-selector" >
-                                <div class="form-group" style={{margin:"2px"}}>
-                                    <select class="form-control" style={{height:"36px", padding:'5px', border:"1px solid"}}>
-                                        <option>Option 1</option>
-                                        <option>Option 2</option>
-                                        <option>Option 3</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="dealer-searchbar">
-                                <div class="form-group" style={{margin:"2px"}}>
-                                    <div style={{display: "flex" , alignItems:"center"}}>
-                                        <input type="search" class="form-control" style={{height:"36px", border:"1px solid"}} />
-                                        <i style={{backgroundColor:"white", padding:"12px",height:"35px", border :"1px solid"}} class="fas fa-search"></i>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                    
+                    <div className="pos-header pos-bill-container" >
                         <div>
-                            <div style={{display:"flex", flexWrap: "nowrap",width:"100%", backgroundColor:"white"}}>
-                                <div  style={{height:"40px", width:"30%",fontSize:"17px",padding:"6px", border:"1px solid lightgray"}}>Product
+                        <div className="bill-header" style={{backgroundColor:"black",color:"#FFDF00"}}>
+                                <div className="dealer-selector" style={{border:"1px solid", borderBottomWidth:"0px"}}>
+                                    <div class="form-group" style={{margin:"2px"}}>
+                                        <select class="form-control" style={{height:"36px", padding:'5px'}}>
+                                            <option>Dealers</option>
+                                            <option>Option 2</option>
+                                            <option>Option 3</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div  style={{height:"40px",width:"25%",fontSize:"17px",padding:"6px", border:"1px solid lightgray" }}>Quantity
+
+                                <div className="dealer-selector" style={{display:"flex", flexWrap:"nowrap",marginLeft:"25px", border:"1px solid", borderBottomWidth:"0px"}}>
+                                    <div style={{width:"50%"}}>
+                                        <div class="form-group" style={{margin:"2px"}}>
+                                            <div style={{display: "flex" , alignItems:"center"}}>
+                                                <input type="search" onChange={(e) => handlecustomer(e)} name="customer_phone_number" id="customer_phone_number" class="form-control" style={{height:"36px", border:"1px solid"}}  placeholder="customerName"/>
+                                                {/* <i style={{backgroundColor:"white", padding:"12px",height:"35px", border :"1px solid"}} class="fas fa-search"></i> */}
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div style={{width:"50%"}}>
+                                        <div class="form-group" style={{margin:"2px"}}>
+                                            <div style={{display: "flex" , alignItems:"center"}}>
+                                                <input onChange={(e) => handlecustomer(e)} name="customer_name" id="customer_name" type="search" class="form-control" style={{height:"36px", border:"1px solid",}}  placeholder="Number" />
+                                                {/* <i style={{backgroundColor:"white", padding:"12px",height:"35px", border :"1px solid"}} class="fas fa-search"></i> */}
+                                            </div>
+
+                                        </div>
+                                    </div>      
                                 </div>
-                                <div  style={{height:"40px",width:"17%",fontSize:"17px", padding:"6px", border:"1px solid lightgray"}}>Price inc. tax
+
+                                <div className="dealer-selector" style={{display:"flex", flexWrap:"nowrap",marginLeft:"25px",border:"1px solid", borderBottomWidth:"0px"}}>
+                                    <div style={{width:"65%"}}>
+                                        <div class="form-group" style={{margin:"2px"}}>
+                                            <select onChange={(e) => handleAgent(e)} class="form-control" style={{height:"36px", padding:'5px'}} placeholder='Agents'>
+                                                <option>Agent</option>
+                                                {agentname && agentname.map(Details => (
+                                                <option value={Details.agent_id}>{Details.first_name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div style={{width:"35%"}}>
+                                        <div class="form-group" style={{margin:"2px"}}>
+                                            <div style={{display: "flex" , alignItems:"center"}}>
+                                                <input onChange={(e) => handleAgentPercentage(e)} type="search" class="form-control" style={{height:"36px", border:"1px solid",}}  placeholder="%" />
+                                                {/* <i style={{backgroundColor:"white", padding:"12px",height:"35px", border :"1px solid"}} class="fas fa-search"></i> */}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style={{height:"40px",width:"17%",fontSize:"17px", padding:"6px", border:"1px solid lightgray"}}>Subtotal
-                                </div>
-                                <div style={{height:"40px",width:"11%",fontSize:"17px",padding:"6px", border:"1px solid lightgray"}}><div>Action</div>
-                                </div>
+
+                            </div>
+                            <div >
+                                <div style={{display:"flex", flexWrap: "nowrap",width:"100%", backgroundColor:"black", color:"#FFDF00"}}>
+                                    <div  style={{height:"40px", width:"30%",fontSize:"17px",padding:"6px", border:"1px solid #FFDF00"}}>Product
+                                    </div>
+                                    <div  style={{height:"40px",width:"25%",fontSize:"17px",padding:"6px", border:"1px solid #FFDF00" }}>Quantity
+                                    </div>
+                                    <div  style={{height:"40px",width:"17%",fontSize:"17px", padding:"6px", border:"1px solid #FFDF00"}}>Price inc. tax
+                                    </div>
+                                    <div style={{height:"40px",width:"17%",fontSize:"17px", padding:"6px", border:"1px solid #FFDF00"}}>Subtotal
+                                    </div>
+                                    <div style={{height:"40px",width:"11%",fontSize:"17px",padding:"6px", border:"1px solid #FFDF00"}}><div>Action</div>
+                                    </div>
+                            </div>
+                            </div>
                         </div>
 
-                        </div>
                         <div  className="bill-container-container" style={{height:"525px",overflow:"scroll",WebkitScrollSnapType:"none"}}>
                         {customerbill && customerbill.map(currentBill => ( 
                             <div style={{display:"flex", flexWrap: "nowrap",width:"100%", backgroundColor:"#EBEBEB", borderBottom:"1px solid lightgray", borderBottom:"1px solid"}}>
@@ -419,7 +575,19 @@ function PointOfSale(props) {
                                     <div style={{border:"1px solid lightgray",width:"15%", height:"40px", display:"flex", alignItems:'center', justifyContent:"center"}}><BsDashSquareFill style={{color:'#DB1414'}}  onClick={()=>DecreaseQuantity(currentBill)}/></div>    
                                 </div>
                                 <div  style={{height:"60px",width:"17%",fontSize:"17px",paddingTop:"10px",margin:"auto",display:"flex", flexWrap: "nowrap",justifyContent:"center"}}>
-                                    <div style={{border:"1px solid lightgray", width:"90%", height:"40px"}}><p>{currentBill.sale_price}</p></div>
+                                    
+                                                {(() => {
+                                                    if (billAccordingWholeSalePrice){
+                                                        return (
+                                                            <div style={{border:"1px solid lightgray", width:"90%", height:"40px"}}><p>{currentBill.whole_sale_price}</p></div>
+                                                        )
+                                                    }else{
+                                                        return(
+                                                            <div style={{border:"1px solid lightgray", width:"90%", height:"40px"}}><p>{currentBill.sale_price}</p></div>
+                                                        )
+                                                    }
+                                    
+                                                })()}
                                 </div>
                                 <div style={{height:"60px",width:"17%",fontSize:"17px",paddingTop:"10px",margin:"auto"}}>
                                     <p>{currentBill.sub_total}</p>
@@ -594,7 +762,9 @@ function PointOfSale(props) {
                         {/* card footer */}
                         <div >
                             <div style={{display:"flex", flexWrap: "nowrap",width:"100%", backgroundColor:"white"}}>
-                                <div  style={{height:"40px", width:"40%",fontSize:"17px",padding:"6px", borderTop:"2px solid lightgray"}}>Items : {numberofbillitem}
+                                <div  style={{height:"40px", width:"20%",fontSize:"17px",padding:"6px", borderTop:"2px solid lightgray"}}>Items : {numberofbillitem}
+                                </div>
+                                <div  style={{height:"40px", width:"20%",fontSize:"17px",padding:"6px", borderTop:"2px solid lightgray"}}>Return(Rs) : {customerreturnamount}
                                 </div>
                                 <div  style={{height:"40px",width:"30%",fontSize:"17px",padding:"6px", borderTop:"1px solid lightgray" }}>Total:  {billtotal}
                                 </div>
@@ -605,14 +775,17 @@ function PointOfSale(props) {
                         </div>
                         <div >
                             <div style={{display:"flex", flexWrap: "nowrap",width:"100%", backgroundColor:"white", height:"50px"}}>
-                                <div  style={{height:"40px", width:"33%",fontSize:"15px",padding:"6px", borderTop:"1px solid lightgray"}}>
+                                <div  style={{height:"40px", width:"25%",fontSize:"15px",padding:"6px", borderTop:"1px solid lightgray"}}>
                                     Discount : <input onChange={(e) => handleDiscount(e)} name="discount" style={{width:'80px', borderWidth:"0px", borderBottom:"2px solid green"}}/>
                                 </div>
-                                <div  style={{height:"40px",width:"33%",fontSize:"15px",padding:"6px", borderTop:"1px solid lightgray" }}>
+                                <div  style={{height:"40px",width:"25%",fontSize:"15px",padding:"6px", borderTop:"1px solid lightgray" }}>
                                     Order Tax(+) : <input onChange={(e) => handleTax(e)} name="tax" style={{width:'80px',borderWidth:"0px",borderBottom:"2px solid green"}}/>
                                 </div>
-                                <div  style={{height:"40px",width:"33%",fontSize:"15px",padding:"6px", borderTop:"1px solid lightgray" }}>
+                                <div  style={{height:"40px",width:"25%",fontSize:"15px",padding:"6px", borderTop:"1px solid lightgray" }}>
                                     Shipping (+) : <input onChange={(e) => handleShipping(e)} name="shipping" style={{width:'80px',borderWidth:"0px",borderBottom:"2px solid green"}}/>
+                                </div>
+                                <div  style={{height:"40px",width:"25%",fontSize:"15px",padding:"6px", borderTop:"1px solid lightgray" }}>
+                                    Cash In (+) : <input onChange={(e) => handleCashIn(e)} name="cash_in" style={{width:'80px',borderWidth:"0px",borderBottom:"2px solid green"}}/>
                                 </div>
                         </div>
                         </div>
@@ -655,7 +828,7 @@ function PointOfSale(props) {
                                             <input onChange={(e) => handle(e)} list="data" name="auther" id="auther" placeholder="All Authers" style={{height:"40px" , width:'76%', lineHeight:"initial"}}/>
                                                 <datalist  id="data">
                                                 {authername && authername.map(autherDetails => (
-                                                <option>{autherDetails.auther}</option>
+                                                <option >{autherDetails.auther}</option>
                                                 ))}
                                                 </datalist>
                                             <div onClick={(e) => AllStock(e)}  style={{height:"40px" , width:'23%', lineHeight:"initial", display:"flex" , alignItems:'center', justifyContent:"center", border:"1px solid"}}>All</div>
@@ -668,7 +841,7 @@ function PointOfSale(props) {
                             <div className="pos-card-container" style={{ width:"100%",display:"flex", flexWrap:"wrap" ,height:"600px", overflow:"scroll", WebkitScrollSnapType:"none"}}>
                             {data.map(stockDetails => ( 
                                 <div class="pos-card" style={{margin:"7px"}} onClick={()=>Bill(stockDetails)}>
-                                <img src={stockDetails.stock_image} alt="John" style={{width:"132px",height:"130px"}}/>
+                                <img src={stockDetails.stock_image} alt="Image" style={{width:"132px",height:"130px"}}/>
                                 <h5>{stockDetails.book_title}</h5>
                                 </div>
                             ))}
@@ -684,79 +857,163 @@ function PointOfSale(props) {
                 </div>
             </div>
             {/* <PrintBill ref={componentRef}  billtotal={billtotal} /> */}
-                <div ref={componentRef}   style={{height:"1200px", width:"100%", marginTop:"50px"}}>
-                <div style={{margin:"0 auto", textAlign:"center", marginTop:"15px" }}>
-                <div style={{padding:"10px",fontSize:'90px'}}>Awesome shop</div>
-                <div style={{padding:"4px",fontSize:'30px'}}><b style={{marginRight:"3px"}}>Addresss:</b> Lahore urdu bazar</div>
-                <div style={{padding:"4px",fontSize:'30px'}}><b style={{marginRight:"3px"}}>GSTIN:</b>34251569696</div>
-                <div style={{padding:"8px",fontSize:'30px'}}><b>Invoice</b></div>
-                </div>
-                <div style={{padding:"30px"}}>
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'25px'}}>
-                        <div style={{ width:"50%"}}><b>Invoice No:</b>123</div>
-                        <div style={{ width:"50%", textAlign:"end"}}><b>Date:</b>12/7/9</div>
-                    </div>
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px", fontSize:'25px'}}>
-                        <div style={{ width:"50%"}}><b>Customer</b></div>
-                    </div>
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'25px'}}>
-                        <div style={{width:"50%"}}>Walk In Customer</div>
-                    </div>
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'25px'}}>
-                        <div style={{width:"50%"}}><b>Addresss:</b> Lahore urdu bazar</div>
-                    </div> 
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px", fontSize:'25px'}}>
-                        <div style={{width:"50%"}}><b>Mobile:</b> 03498699360</div>
-                    </div>
-                </div>
-                <div style={{padding:"30px"}}>
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"40px",  fontSize:'20px', borderBottom:"1px solid black"}}>
-                        <div style={{ width:"50%"}}><b>Product</b></div>
-                        <div style={{ width:"20%", textAlign:"center", padding:"3px"}}><b>Quantity</b></div>
-                        <div style={{ width:"15%", textAlign:"center", padding:"3px"}}><b>Unit Price</b></div>
-                        <div style={{ width:"15%", textAlign:"center", padding:"3px"}}><b>Subtotal</b></div>
-                    </div>
-                    {customerbill && customerbill.map(currentBill => (
-                        <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"25px",  fontSize:'18px'}}>
-                            <div style={{ width:"50%"}}>{currentBill.book_title}</div>
-                            <div style={{ width:"20%", textAlign:"center"}}>{currentBill.sell_quantity}</div>
-                            <div style={{ width:"15%", textAlign:"center"}}>{currentBill.sale_price}</div>
-                            <div style={{ width:"15%", textAlign:"center"}}>{currentBill.sub_total}</div>
+            {(() => {
+                if (billwithoutheader){
+                    return (
+                        <div ref={componentRef}   style={{height:"1200px", width:"100%", marginTop:"50px"}}>
+                            {/* <div style={{margin:"0 auto", textAlign:"center", marginTop:"15px" }}>
+                                <div style={{padding:"10px",fontSize:'90px'}}>Awesome shop</div>
+                                <div style={{padding:"4px",fontSize:'30px'}}><b style={{marginRight:"3px"}}>Addresss:</b> Lahore urdu bazar</div>
+                                <div style={{padding:"4px",fontSize:'30px'}}><b style={{marginRight:"3px"}}>GSTIN:</b>34251569696</div>
+                                <div style={{padding:"8px",fontSize:'30px'}}><b>Invoice</b></div>
+                            </div> */}
+                            <div style={{padding:"30px"}}>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'25px'}}>
+                                    <div style={{ width:"50%"}}><b>Invoice No :</b>123</div>
+                                    <div style={{ width:"50%", textAlign:"end"}}><b>Date :</b>12/7/9</div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px", fontSize:'25px'}}>
+                                    <div style={{ width:"50%"}}><b>Customer :</b>{customername}</div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'25px'}}>
+                                    <div style={{width:"50%"}}>Walk In Customer</div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'25px'}}>
+                                    <div style={{width:"50%"}}><b>Addresss :</b> Lahore urdu bazar</div>
+                                </div> 
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px", fontSize:'25px'}}>
+                                    <div style={{width:"50%"}}><b>Mobile :</b> {customerphonenumber}</div>
+                                </div>
+                            </div>
+                            <div style={{padding:"30px"}}>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"40px",  fontSize:'20px', borderBottom:"1px solid black"}}>
+                                    <div style={{ width:"50%"}}><b>Product</b></div>
+                                    <div style={{ width:"20%", textAlign:"center", padding:"3px"}}><b>Quantity</b></div>
+                                    <div style={{ width:"15%", textAlign:"center", padding:"3px"}}><b>Unit Price</b></div>
+                                    <div style={{ width:"15%", textAlign:"center", padding:"3px"}}><b>Subtotal</b></div>
+                                </div>
+                                {customerbill && customerbill.map(currentBill => (
+                                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"25px",  fontSize:'18px'}}>
+                                        <div style={{ width:"50%"}}>{currentBill.book_title}</div>
+                                        <div style={{ width:"20%", textAlign:"center"}}>{currentBill.sell_quantity}</div>
+                                        <div style={{ width:"15%", textAlign:"center"}}>{currentBill.sale_price}</div>
+                                        <div style={{ width:"15%", textAlign:"center"}}>{currentBill.sub_total}</div>
+                                    </div>
+                                    
+                                ))}
+                                {/* <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"25px",  fontSize:'18px'}}>
+                                    <div style={{ width:"50%"}}>Child book Magic</div>
+                                    <div style={{ width:"20%", textAlign:"center"}}>12</div>
+                                    <div style={{ width:"15%", textAlign:"center"}}>500</div>
+                                    <div style={{ width:"15%", textAlign:"center"}}>6000</div>
+                                </div> */}
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"20px",  fontSize:'12px', borderBottom:"1px solid"}}></div>
+                            </div>
+                            <div style={{padding:"30px"}}>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
+                                    <div style={{ width:"50%", display:"flex",flexWrap:"nowrap"}}><div style={{width:"30%"}}><b>Cash:</b></div>  <div style={{width:"70%"}}> Rs {billtotal}</div></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid lightgray"}}><div style={{width:"50%"}}><b>Discount:</b></div>  <div style={{width:"50%"}}> Rs {billdiscount}</div></div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
+                                    <div style={{ width:"50%", display:"flex",flexWrap:"nowrap"}}><div style={{width:"30%"}}><b>Total Paid:</b></div>  <div style={{width:"70%"}}> Rs {billtotal}</div></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid lightgray"}}><div style={{width:"50%"}}><b>Tax:</b></div>  <div style={{width:"50%"}}> Rs {billtax}</div></div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
+                                    <div style={{ width:"50%"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid gray"}}><div style={{width:"50%"}}><b>Shipping:</b></div>  <div style={{width:"50%"}}> Rs {billshipping}</div></div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
+                                    <div style={{ width:"50%"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid gray"}}><div style={{width:"50%"}}><b>Total:</b></div>  <div style={{width:"50%"}}> Rs {billtotal}</div></div>
+                                </div>
+                            </div>
                         </div>
+                    )
+                }else{
+                    return(
+                        <div ref={componentRef}   style={{height:"1200px", width:"100%", marginTop:"50px"}}>
+                            <div style={{margin:"0 auto", textAlign:"center", marginTop:"15px" }}>
+                            <div style={{padding:"10px",fontSize:'90px'}}>Awesome shop</div>
+                            <div style={{padding:"4px",fontSize:'30px'}}><b style={{marginRight:"3px"}}>Addresss:</b> Lahore urdu bazar</div>
+                            <div style={{padding:"4px",fontSize:'30px'}}><b style={{marginRight:"3px"}}>GSTIN:</b>34251569696</div>
+                            <div style={{padding:"8px",fontSize:'30px'}}><b>Invoice</b></div>
+                            </div>
+                            <div style={{padding:"30px"}}>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'25px'}}>
+                                    <div style={{ width:"50%"}}><b>Invoice No:</b>123</div>
+                                    <div style={{ width:"50%", textAlign:"end"}}><b>Date:</b>12/7/9</div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px", fontSize:'25px'}}>
+                                    <div style={{ width:"50%"}}><b>Customer : </b>{customername}</div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'25px'}}>
+                                    <div style={{width:"50%"}}>Walk In Customer</div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'25px'}}>
+                                    <div style={{width:"50%"}}><b>Addresss:</b> Lahore urdu bazar</div>
+                                </div> 
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px", fontSize:'25px'}}>
+                                    <div style={{width:"50%"}}><b>Mobile:</b> {customerphonenumber}</div>
+                                </div>
+                            </div>
+                            <div style={{padding:"30px"}}>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"40px",  fontSize:'20px', borderBottom:"1px solid black"}}>
+                                    <div style={{ width:"50%"}}><b>Product</b></div>
+                                    <div style={{ width:"20%", textAlign:"center", padding:"3px"}}><b>Quantity</b></div>
+                                    <div style={{ width:"15%", textAlign:"center", padding:"3px"}}><b>Unit Price</b></div>
+                                    <div style={{ width:"15%", textAlign:"center", padding:"3px"}}><b>Subtotal</b></div>
+                                </div>
+                                {customerbill && customerbill.map(currentBill => (
+                                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"25px",  fontSize:'18px'}}>
+                                        <div style={{ width:"50%"}}>{currentBill.book_title}</div>
+                                        <div style={{ width:"20%", textAlign:"center"}}>{currentBill.sell_quantity}</div>
+                                        <div style={{ width:"15%", textAlign:"center"}}>{currentBill.sale_price}</div>
+                                        <div style={{ width:"15%", textAlign:"center"}}>{currentBill.sub_total}</div>
+                                    </div>
+                                    
+                                ))}
+                                {/* <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"25px",  fontSize:'18px'}}>
+                                    <div style={{ width:"50%"}}>Child book Magic</div>
+                                    <div style={{ width:"20%", textAlign:"center"}}>12</div>
+                                    <div style={{ width:"15%", textAlign:"center"}}>500</div>
+                                    <div style={{ width:"15%", textAlign:"center"}}>6000</div>
+                                </div> */}
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"20px",  fontSize:'12px', borderBottom:"1px solid"}}></div>
+                            </div>
+                            <div style={{padding:"30px"}}>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
+                                    <div style={{ width:"50%", display:"flex",flexWrap:"nowrap"}}><div style={{width:"30%"}}><b>Cash:</b></div>  <div style={{width:"70%"}}> Rs {billtotal}</div></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid lightgray"}}><div style={{width:"50%"}}><b>Discount:</b></div>  <div style={{width:"50%"}}> Rs {billdiscount}</div></div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
+                                    <div style={{ width:"50%", display:"flex",flexWrap:"nowrap"}}><div style={{width:"30%"}}><b>Total Paid:</b></div>  <div style={{width:"70%"}}> Rs {billtotal}</div></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid lightgray"}}><div style={{width:"50%"}}><b>Tax:</b></div>  <div style={{width:"50%"}}> Rs {billtax}</div></div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
+                                    <div style={{ width:"50%"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid gray"}}><div style={{width:"50%"}}><b>Shipping:</b></div>  <div style={{width:"50%"}}> Rs {billshipping}</div></div>
+                                </div>
+                                <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
+                                    <div style={{ width:"50%"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
+                                    <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid gray"}}><div style={{width:"50%"}}><b>Total:</b></div>  <div style={{width:"50%"}}> Rs {billtotal}</div></div>
+                                </div>
+                            </div>
                         
-                    ))}
-                    {/* <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"25px",  fontSize:'18px'}}>
-                        <div style={{ width:"50%"}}>Child book Magic</div>
-                        <div style={{ width:"20%", textAlign:"center"}}>12</div>
-                        <div style={{ width:"15%", textAlign:"center"}}>500</div>
-                        <div style={{ width:"15%", textAlign:"center"}}>6000</div>
-                    </div> */}
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"20px",  fontSize:'12px', borderBottom:"1px solid"}}></div>
-                </div>
-                <div style={{padding:"30px"}}>
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
-                        <div style={{ width:"50%", display:"flex",flexWrap:"nowrap"}}><div style={{width:"30%"}}><b>Cash:</b></div>  <div style={{width:"70%"}}> Rs {billtotal}</div></div>
-                        <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
-                        <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid lightgray"}}><div style={{width:"50%"}}><b>Discount:</b></div>  <div style={{width:"50%"}}> Rs {billdiscount}</div></div>
-                    </div>
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
-                        <div style={{ width:"50%", display:"flex",flexWrap:"nowrap"}}><div style={{width:"30%"}}><b>Total Paid:</b></div>  <div style={{width:"70%"}}> Rs {billtotal}</div></div>
-                        <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
-                        <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid lightgray"}}><div style={{width:"50%"}}><b>Tax:</b></div>  <div style={{width:"50%"}}> Rs {billtax}</div></div>
-                    </div>
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
-                        <div style={{ width:"50%"}}></div>
-                        <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
-                        <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid gray"}}><div style={{width:"50%"}}><b>Shipping:</b></div>  <div style={{width:"50%"}}> Rs {billshipping}</div></div>
-                    </div>
-                    <div style={{display:"flex", flexWrap:"nowrap" , width:"100%", height:"32px",  fontSize:'20px'}}>
-                        <div style={{ width:"50%"}}></div>
-                        <div style={{ width:"25%", display:"flex",flexWrap:"nowrap"}}></div>
-                        <div style={{ width:"25%", display:"flex",flexWrap:"nowrap", borderBottom:"1px solid gray"}}><div style={{width:"50%"}}><b>Total:</b></div>  <div style={{width:"50%"}}> Rs {billtotal}</div></div>
-                    </div>
-                </div>
-                
-                </div>
+                        </div>
+                    )
+                }
+
+            })()}
+
+
         </>
 
     );
