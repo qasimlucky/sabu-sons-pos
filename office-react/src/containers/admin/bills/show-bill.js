@@ -1,13 +1,14 @@
 
 import React,{ useState,useEffect } from "react";
 import {useLocation} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import  { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 
 function ShowBill(props) {
 
     const [customerbill, setCustomerBill] = useState([])
-
+    let navigate = useNavigate();
     const location = useLocation();
     console.log("this is receving")
     console.log(location.state.sendData) 
@@ -23,15 +24,19 @@ function ShowBill(props) {
         const handlePrint = useReactToPrint({
           content: () => componentRef.current,
           onAfterPrint: () => {
-
           }
-          
-        
         });
+
+        function handleBack(){
+            navigate("/allbill")
+        }
     return (
         <>
-        <button onClick={()=>handlePrint()} style={{backgroundColor:"#3280F8"}}>
+        <button onClick={()=>handlePrint()} style={{backgroundColor:"#3280F8",float:"right", color:"white"}}>
             Print
+        </button>
+        <button onClick={()=>handleBack()} style={{backgroundColor:"green", color:"white",}} >
+            Back
         </button>
          <div ref={componentRef} style={{height:"1200px", width:"100%", marginTop:"50px"}}>
             <div style={{margin:"0 auto", textAlign:"center", marginTop:"15px" }}>

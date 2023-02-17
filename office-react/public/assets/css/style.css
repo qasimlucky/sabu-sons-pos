@@ -1,4 +1,11 @@
-﻿
+﻿/* .react-date-picker__wrapper{
+    width:200px;
+    
+} */
+.react-date-picker{
+    width:98%;
+    height:40px
+} 
 .hide-scrollbar::-webkit-scrollbar {
     display: none;
  }
@@ -49,11 +56,11 @@ body:has(.requires-no-scroll) {
     height:93vh;
 }
 .dealer-selector{
-    width:40%;
+    width:33%;
     text-align: center;
 }
 .dealer-searchbar{
-    width: 40%;
+    width: 30%;
     text-align: center;
     margin-left: 25px;
 
@@ -72,6 +79,9 @@ body:has(.requires-no-scroll) {
     display: none; 
   }    
   
+  .puschase-stock-list::-webkit-scrollbar {
+    display: none; 
+  }
 .m-l--125 {
     margin-left: -125px
 }

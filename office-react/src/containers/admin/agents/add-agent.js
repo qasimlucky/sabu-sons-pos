@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import Sidebar from "../Sidebar";
 import Navbar from "../Navbar";
@@ -6,10 +7,16 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 
 
-function AddPartner(props) {
-
+function AddAgent(props) {
+  let navigate = useNavigate();
   const MySwal = withReactContent(Swal)
-  const [data, setData] = useState({})
+  const [data, setData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone_number: "",
+    password: "",
+  })
 
   function handle(e) {
     const newdata = { ...data }
@@ -17,7 +24,7 @@ function AddPartner(props) {
     setData(newdata)
    // console.log(data)
   }
-  const url = "https://subo-sons-backend.onrender.com/partner/add"
+  const url = "http://localhost:8000/agent/add"
   function submit(e) {
     console.log(data)
     e.preventDefault();
@@ -28,10 +35,11 @@ function AddPartner(props) {
         Swal.fire({
           icon: 'success',
           title: 'Congratulations',
-          text: 'New Partner  Add!!!!',
+          text: 'New Agent is Add!!!!',
           showConfirmButton: false,
           timer: 1500
         })
+        navigate("/allagent")
       }).catch(err =>{
         Swal.fire({
           icon: 'error',
@@ -42,8 +50,8 @@ function AddPartner(props) {
         })
           console.log(err)
         })
-
-  }
+        navigate("/allagent")
+      }
 
   return (
     <>
@@ -57,13 +65,13 @@ function AddPartner(props) {
               <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-11 offset-xl-2">
                 <div class="card card-primary">
                   <div class="card-header">
-                    <h4>Add Partner</h4>
+                    <h4>Add Agent</h4>
                   </div>
                   <div class="card-body">
                     <form onSubmit={(e) => submit(e)} method="HTTP_METHOD" enctype="multipart/form-data">
 
 
-                      <label className="badge badge-primary badge-shadow" style={{ padding: "8px" }}>Partner Details</label>
+                      <label className="badge badge-primary badge-shadow" style={{ padding: "8px" }}>Agent Details</label>
                       <div class="row">
                         <div class="form-group col-6">
                           <label for="">First Name</label>
@@ -85,11 +93,11 @@ function AddPartner(props) {
                           <input onChange={(e) => handle(e)} id="email" type="text" class="form-control" name="email"  placeholder="e.g newdealer@gmail.com"/>
                         </div>
                       </div>
-                      <label className="badge badge-primary badge-shadow" style={{ padding: "8px" }}>Percentage Details</label>
+                      <label className="badge badge-primary badge-shadow" style={{ padding: "8px" }}>credentials</label>
                       <div class="row">
                         <div class="form-group col-6">
-                          <label>Percentage</label>
-                          <input onChange={(e) => handle(e)} id="percentage" type="text" class="form-control" name="percentage" placeholder="Should be %"/>
+                          <label>password</label>
+                          <input onChange={(e) => handle(e)} id="password" type="text" class="form-control" name="password" placeholder="Please select strong password"/>
                         </div>
                       </div>
 
@@ -97,7 +105,7 @@ function AddPartner(props) {
                       <div class="form-group col-4"></div>
                         <div class="form-group col-4">
                           <button type="submit" class="btn btn-success btn-lg btn-block" style={{marginTop:"15px"}}>
-                            Add Partner
+                            Add Agent
                           </button>
                         </div>
                       </div>
@@ -114,4 +122,4 @@ function AddPartner(props) {
 }
 
 
-export default AddPartner;
+export default AddAgent;
