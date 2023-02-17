@@ -1,4 +1,5 @@
 import React,{useState,useEffect} from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import Sidebar from "../Sidebar";
 import Navbar from "../Navbar";
@@ -15,7 +16,7 @@ const [data, setData] = useState({})
 const [dbpartner, setDbPartner] = useState()
 const [stockpartner, setStockPartner] = useState([])
 const [stockcategories, setStockCategories] = useState([{}])  
-
+let navigate = useNavigate();
 function ChangeMe(){
   setIsShow(false)
 }
@@ -24,7 +25,7 @@ function ChangeAgain(){
 }
 
 useEffect(() => {
-  axios.get("/partner/get").then(Response =>{
+  axios.get("https://subo-sons-backend.onrender.com/partner/get").then(Response =>{
     console.log(Response.data)
     setDbPartner(Response.data)
   }).catch(err =>{
@@ -33,7 +34,7 @@ useEffect(() => {
   },[]);
 
   useEffect(() => {
-    axios.get("/stock/get/categories").then(Response =>{
+    axios.get("https://subo-sons-backend.onrender.com/stock/get/categories").then(Response =>{
       console.log(Response.data)
       setStockCategories(Response.data)
     }).catch(err =>{
@@ -75,9 +76,8 @@ useEffect(() => {
   }
 
 
-const url = "/stock/add"
+const url = "https://subo-sons-backend.onrender.com/stock/add"
 function handle(e){
-    
        const newdata = {...data}
        newdata[e.target.id] = e.target.value
        setData(newdata)
@@ -116,6 +116,7 @@ async function StockImage (e){
           text: 'New Stock Add!!!!',
         })
         console.log(res.data)
+        navigate("/allstock")
       }).catch(err =>{
         Swal.fire({
           icon: 'error',
@@ -123,6 +124,7 @@ async function StockImage (e){
           text: 'Something went wrong!',
         })
           console.log(err)
+          navigate("/allstock")
         })
 
 } 
@@ -134,9 +136,7 @@ async function StockImage (e){
       <Sidebar/>
 
   <div id="app" style={{marginTop : 150}}>
-
-    
-        <section class="section">
+      <section class="section">
         {isshow && (
           <div class="container mt-10">
             <div class="row">
@@ -157,37 +157,22 @@ async function StockImage (e){
                         </div>
                         <div class="form-group col-3">
                           <label for="">ISBN</label>
-                          <input onChange = {(e) =>handle(e)} id="isbn" type="text" class="form-control" name="isbn" placeholder="Book Title"  />
+                          <input onChange = {(e) =>handle(e)} id="isbn" type="text" class="form-control" name="isbn" placeholder="ISBN"  />
                         </div>
                         <div class="form-group col-3">
                           <label for="">Publisher Name</label>
-                          <input onChange = {(e) =>handle(e)} id="purchase_price" type="text" class="form-control" name="purchase_price" placeholder="Book Title"  />
+                          <input onChange = {(e) =>handle(e)} id="Publisher_name" type="text" class="form-control" name="Publisher_name" placeholder="e.g Ali"  />
                         </div>
                         <div class="form-group col-3">
                           <label for="">Quantity</label>
-                          <input onChange = {(e) =>handle(e)} id="quantity" type="text" class="form-control" name="quantity" placeholder="Quantity" />
+                          <input onChange = {(e) =>handle(e)} id="quantity" type="text" class="form-control" name="quantity" placeholder="Number" />
                         </div>
-                      </div>
-                      <label  className="badge badge-primary badge-shadow" style={{padding:"8px"}}>Price Info</label>
-                      <div class="row">
-                        <div class="form-group col-4">
-                            <label for="">purchase price</label>
-                            <input onChange = {(e) =>handle(e)}  id="purchase_price" type="text" class="form-control" name="purchase_price" placeholder="Sale Price"/>
-                        </div>
-                        <div class="form-group col-4">
-                            <label for="">Whole Sale Price</label>
-                            <input onChange = {(e) =>handle(e)} id="whole_sale_price" type="text" class="form-control" name="whole_sale_price"  placeholder="Whole Sale Price"/>
-                        </div>
-                        <div class="form-group col-4">
-                            <label for="">Sale Price</label>
-                            <input onChange = {(e) =>handle(e)}  id="sale_price" type="text" class="form-control" name="sale_price" placeholder="Sale Price"/>
-                        </div>  
                       </div>
                       <label  className="badge badge-primary badge-shadow" style={{padding:"8px"}}>Book Info</label>
                       <div class="row">
                         <div class="form-group col-3">
                           <label>Auther</label>
-                          <input onChange = {(e) =>handle(e)} id="auther" type="text" class="form-control" name="auther" placeholder="auther" />
+                          <input onChange = {(e) =>handle(e)} id="auther" type="text" class="form-control" name="auther" placeholder="Authur" />
                         </div>
                         <div class="form-group col-3">
                           <label for="">Description</label>
@@ -195,7 +180,7 @@ async function StockImage (e){
                         </div>
                         <div class="form-group col-3">
                           <label for="">Record Level</label>
-                          <input onChange = {(e) =>handle(e)}  id="record_level" type="text" class="form-control" name="record_level" placeholder="any number"/>
+                          <input onChange = {(e) =>handle(e)}  id="record_level" type="text" class="form-control" name="record_level" placeholder="Number"/>
                         </div>
                         <div class="form-group col-3">
                         <label for="">Catagories</label>
@@ -208,6 +193,21 @@ async function StockImage (e){
                                       </datalist>
                             </div>
                         </div>
+                      </div>
+                      <label  className="badge badge-primary badge-shadow" style={{padding:"8px"}}>Price Info</label>
+                      <div class="row">
+                        <div class="form-group col-4">
+                            <label for="">purchase price</label>
+                            <input onChange = {(e) =>handle(e)}  id="purchase_price" type="text" class="form-control" name="purchase_price" placeholder="Purchase Price"/>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="">Whole-sale Price</label>
+                            <input onChange = {(e) =>handle(e)} id="whole_sale_price" type="text" class="form-control" name="whole_sale_price"  placeholder="Whole Sale Price"/>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="">Sale Price</label>
+                            <input onChange = {(e) =>handle(e)}  id="sale_price" type="text" class="form-control" name="sale_price" placeholder="Sale Price"/>
+                        </div>  
                       </div>                  
                       <div class="row">
                       <div class="form-group col-4"></div>
@@ -330,11 +330,8 @@ async function StockImage (e){
               </div>
           )}
           {/* after false */}
-        </section>
-
-     
+      </section>
   </div>
-  
 </>
        );
 }

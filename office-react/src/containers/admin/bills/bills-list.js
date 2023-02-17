@@ -16,19 +16,24 @@ function AllBill() {
   const [data, setData] = useState([])
   const [itemOffset, setItemOffset] = useState(0);
   const MySwal = withReactContent(Swal)
-
+  let navigate = useNavigate();
 
 
   useEffect(() => {
-    axios.get("/bill/get")
-    .then(Response =>{
-      //console.log(Response.data)
-      setData(Response.data)
-    }).catch(err =>{
-      console.log(err)
-    })
-    console.log("ready to destructure")
-    console.log(data)
+   async function GetRequest(){
+     await axios.get("https://subo-sons-backend.onrender.com/bill/get")
+      .then(Response =>{
+        console.log(Response.data)
+        setData(Response.data)
+      }).catch(err =>{
+        console.log("this is error")
+        console.log(err)
+      })
+      console.log("ready to destructure")
+      console.log(data)
+
+    }
+    GetRequest();
     /* data.forEach(myfunction)
     function myfunction(item){
       console.log(item.bill_items)
@@ -80,7 +85,6 @@ function AllBill() {
       }) 
     } 
 
-    let navigate = useNavigate();
     function OpenBill(billDetails){
       console.log(billDetails)
       navigate("/bill",{state:{sendData:billDetails}})
