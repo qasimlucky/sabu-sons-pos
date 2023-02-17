@@ -59,7 +59,7 @@ const createStock = async function (req, res){
         var stock_id = 'ss-stock-'+(Number(stock_collection_index)+1);
             stock_collection_index = (Number(stock_collection_index)+1)
             if(req.file){
-                const stock_image =("http://localhost:8000/static/"+req.file.filename);
+                const stock_image =("https://subo-sons-backend.onrender.com/static"+req.file.filename);
                 var stock = await Stock.create({
                     stock_id,
                     stock_collection_index,
@@ -139,7 +139,7 @@ const createStock = async function (req, res){
         if(req.file){
             const  partner = JSON.parse(req.body.partner)
             console.log("this is req.file")
-            const stock_image =("http://localhost:8000/static/"+req.file.filename);
+            const stock_image =("https://subo-sons-backend.onrender.com/static/"+req.file.filename);
             const data = req.body;
             //var cleanData = await CleanData(data);
             const {stock_id,book_title,quantity,whole_sale_price,sale_price,description,auther,Publisher_name,purchase_price,isbn,categories,record_level} = req.body;
@@ -152,12 +152,20 @@ const createStock = async function (req, res){
             //const data = req.body;
             //var cleanData = await CleanData(data);
             console.log(req.body)
-            const  partner = JSON.parse(req.body.partner)
-            console.log(partner)
-            const {stock_id,book_title,quantity,whole_sale_price,sale_price,description,auther,Publisher_name,isbn,record_level,purchase_price,categories} = req.body;
-            const updatedDealer = await Stock.findOneAndUpdate({stock_id:stock_id},{$set :{book_title:book_title,quantity:quantity,purchase_price:purchase_price,sale_price:sale_price,description:description,auther:auther,whole_sale_price:whole_sale_price,Publisher_name:Publisher_name,isbn:isbn,categories:categories,record_level:record_level,partner:partner}});
-            const stockList = await Stock.find({stock_id:stock_id});
-            res.send (stockList)
+            //const  partner = JSON.parse(req.body.partner)
+            if(req.body.partner == undefined){
+                const {stock_id,book_title,quantity,whole_sale_price,sale_price,description,auther,Publisher_name,isbn,record_level,purchase_price,categories} = req.body;
+                const updatedDealer = await Stock.findOneAndUpdate({stock_id:stock_id},{$set :{book_title:book_title,quantity:quantity,purchase_price:purchase_price,sale_price:sale_price,description:description,auther:auther,whole_sale_price:whole_sale_price,Publisher_name:Publisher_name,isbn:isbn,categories:categories,record_level:record_level}});
+                const stockList = await Stock.find({stock_id:stock_id});
+                res.send (stockList)
+            }else{
+                const  partner = JSON.parse(req.body.partner)
+                const {stock_id,book_title,quantity,whole_sale_price,sale_price,description,auther,Publisher_name,isbn,record_level,purchase_price,categories} = req.body;
+                const updatedDealer = await Stock.findOneAndUpdate({stock_id:stock_id},{$set :{book_title:book_title,quantity:quantity,purchase_price:purchase_price,sale_price:sale_price,description:description,auther:auther,whole_sale_price:whole_sale_price,Publisher_name:Publisher_name,isbn:isbn,categories:categories,record_level:record_level,partner:partner}});
+                const stockList = await Stock.find({stock_id:stock_id});
+                res.send (stockList)
+            }
+
         }
 
     } catch (error) { 
