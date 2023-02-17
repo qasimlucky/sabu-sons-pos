@@ -26,7 +26,7 @@ function EditDealerForm(props) {
     setData(newdata)
    // console.log(data)
   }
-  const url = "/dealer/edit"
+  const url = "https://subo-sons-backend.onrender.com/dealer/edit"
   function submit(e) {
     console.log("this is send data to server")
     console.log(data)
@@ -55,6 +55,7 @@ function EditDealerForm(props) {
           text: 'Something went wrong!',
         })
           console.log(err)
+          navigate("/alldealer")
         })
 
   }

@@ -4,12 +4,14 @@ import Sidebar from "../Sidebar";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 import { Link,useNavigate } from 'react-router-dom';
+import ReactPaginate from 'react-paginate';
 
 function DealerList() {
   const [data, setposts] = useState([{}])
+  const [itemOffset, setItemOffset] = useState(0);
 
     useEffect(() => {
-      axios.get("/dealer/get").then(Response =>{
+      axios.get("https://subo-sons-backend.onrender.com/dealer/get").then(Response =>{
         console.log(Response.data
           )
         setposts(Response.data)
@@ -26,6 +28,24 @@ function DealerList() {
            
         }
 
+        
+      var itemsPerPage = 6
+      // Simulate fetching items from another resources.
+      // (This could be items from props; or items loaded in a local state
+      // from an API endpoint with useEffect and useState)
+      const endOffset = itemOffset + itemsPerPage;
+      console.log(`Loading items from ${itemOffset} to ${endOffset}`);
+      const currentItems = data.slice(itemOffset, endOffset);
+      const pageCount = Math.ceil(data.length / itemsPerPage);
+
+    const handlePageClick = (event) => {
+      const newOffset = (event.selected * itemsPerPage) % data.length;
+      console.log(
+        `User requested page number ${event.selected}, which is offset ${newOffset}`
+      );
+      setItemOffset(newOffset);
+    };
+
        return (
         <>
       <Navbar/>
@@ -39,7 +59,7 @@ function DealerList() {
                   <h4>All Dealer</h4>
                   <div className="card-header-form">
                     <Link to="/adddealers" className="btn btn-success ">
-                      + Add User
+                      + Add Dealer
                     </Link>
                   </div>
                 </div>
@@ -58,52 +78,6 @@ function DealerList() {
                       </div>
                     </div>
                   </div>
-                  <div className="dropdown d-inline ml-1">
-                    <button
-                      className="btn btn-danger dropdown-toggle"
-                      type="button"
-                      id="dropdownMenuButton"
-                      data-toggle="dropdown"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
-                      Country
-                    </button>
-                    <div className="dropdown-menu">
-                      <a className="dropdown-item" href="#">
-                        Action
-                      </a>
-                      <a className="dropdown-item" href="#">
-                        Another action
-                      </a>
-                      <a className="dropdown-item" href="#">
-                        Something else here
-                      </a>
-                    </div>
-                  </div>
-                  <div className="dropdown d-inline ml-1 float-right">
-                    <button
-                      className="btn btn-danger dropdown-toggle"
-                      type="button"
-                      id="dropdownMenuButton"
-                      data-toggle="dropdown"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
-                      State
-                    </button>
-                    <div className="dropdown-menu">
-                      <a className="dropdown-item" href="#">
-                        Action
-                      </a>
-                      <a className="dropdown-item" href="#">
-                        Another action
-                      </a>
-                      <a className="dropdown-item" href="#">
-                        Something else here
-                      </a>
-                    </div>
-                  </div>
                 </div>
                 <div className="card-body p-0">
                   <div className="table-responsive">
@@ -117,7 +91,7 @@ function DealerList() {
                           <th>Status</th>
                           <th>Action</th>
                          </tr> 
-                         {data.map(dealerDetails => ( 
+                         {currentItems.map(dealerDetails => ( 
                           <tr className="align-center">
 
                           <td>{dealerDetails.first_name}</td>
@@ -138,6 +112,28 @@ function DealerList() {
                            ))} 
                       </tbody>
                     </table>
+                    <div >
+                      <ReactPaginate
+                          previousLabel="Previous"
+                          nextLabel="Next"
+                          pageClassName="page-item"
+                          pageLinkClassName="page-link"
+                          previousClassName="page-item"
+                          previousLinkClassName="page-link"
+                          nextClassName="page-item"
+                          nextLinkClassName="page-link"
+                          breakLabel="..."
+                          breakClassName="page-item"
+                          breakLinkClassName="page-link"
+                          pageCount={pageCount}
+                          marginPagesDisplayed={2}
+                          pageRangeDisplayed={8}
+                          onPageChange={handlePageClick}
+                          containerClassName="pagination"
+                          activeClassName="active"
+                          />
+
+                      </div>
                   </div>
                 </div>
               </div>

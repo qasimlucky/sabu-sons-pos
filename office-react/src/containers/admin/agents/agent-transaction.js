@@ -4,19 +4,19 @@ import Sidebar from "../Sidebar";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 import {useLocation} from 'react-router-dom';
-function PartnerTransaction() {
+function AgentTransaction() {
     const [data, setData] = useState([{}])
     const [isshow,setIsShow] = useState(false)
     
     const location = useLocation();
         //console.log("this is receving") 
-      const partnerData = location.state.sendData;
-      console.log(partnerData.partner_id)
-      const partner_id = partnerData.partner_id
+      const AgentData = location.state.sendData;
+      console.log(AgentData.partner_id)
+      const agent_id = AgentData.agent_id
 
       useEffect(() => {
         axios
-        .post("https://subo-sons-backend.onrender.com/partner/transaction", {partner_id:partner_id})
+        .post("http://localhost:8000/agent/transaction", {agent_id:agent_id})
         .then(res => {
           console.log(res.data)
           setData(res.data)
@@ -49,9 +49,10 @@ function PartnerTransaction() {
                                     <span class="bullet"></span>
                                 </div>
                                 <div style={{display:"flex", flexWrap:"nowrap", width:"100%"}}>
-                                    <div style={{}}><p><b style={{marginRight:"8px"}}>Name :</b> {TransactionDetails.partner_name}</p></div>
-                                    <div style={{marginLeft:"50px"}}><p><b style={{marginRight:"10px"}}>Total profit :</b>{TransactionDetails.total_profit}</p></div>
-                                    <div style={{marginLeft:"50px"}}><p><b style={{marginRight:"10px"}}>Order Total :</b>{TransactionDetails.bill_total}</p></div>
+                                    <div style={{}}><p><b style={{marginRight:"8px"}}>Order No :</b> {TransactionDetails.bill_id}</p></div>
+                                    <div style={{marginLeft:"50px"}}><p><b style={{marginRight:"10px"}}>Total Bill Amount :</b>{TransactionDetails.bill_total}</p></div>
+                                    <div style={{marginLeft:"50px"}}><p><b style={{marginRight:"10px"}}>Commission percentage :</b>{TransactionDetails.commission_percentage}%</p></div>
+                                    <div style={{marginLeft:"50px"}}><p><b style={{marginRight:"10px"}}>Commission Amount :</b>{TransactionDetails.commission_amount}</p></div>
     
                                     {/* <p><b style={{marginRight:"20px"}}>Name :</b> <p>{TransactionDetails.partner_name}</p> <b style={{marginRight:"20px"}}>Total profit</b>{TransactionDetails.total_profit}</p> */}
                                 </div>
@@ -66,17 +67,17 @@ function PartnerTransaction() {
                                       ))}
                                     </div>
                                     <div style={{marginLeft:"60px"}}>
-                                      <p><b style={{marginRight:"10px"}}>Percentage</b></p>
-                                      { TransactionDetails && (TransactionDetails.percentage).map(Details => (
-                                        <div style={{marginLeft:"20px"}}>{Details}%</div>
+                                      <p><b style={{marginRight:"10px"}}>Quantity</b></p>
+                                      { TransactionDetails && (TransactionDetails.books_quantity).map(Details => (
+                                        <div style={{marginLeft:"20px"}}>{Details}</div>
                                       ))}
                                     </div>
-                                    <div style={{marginLeft:"80px"}}>
+                                   {/*  <div style={{marginLeft:"80px"}}>
                                       <div><p><b >Profit</b></p></div>
                                       { TransactionDetails && (TransactionDetails.each_book_profit).map(Details => (
                                         <div >{Details}</div>
                                       ))}
-                                    </div>
+                                    </div> */}
 
 
                                     {/* <div style={{marginLeft:"50px"}}><p><b style={{marginRight:"10px"}}>percentage :</b>{(TransactionDetails.percentage).join(', ')}</p></div> */}
@@ -104,4 +105,4 @@ function PartnerTransaction() {
     }
 
 
-export default PartnerTransaction;
+export default AgentTransaction;
