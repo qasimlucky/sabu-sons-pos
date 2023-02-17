@@ -11,7 +11,7 @@ function StockList() {
   const [itemOffset, setItemOffset] = useState(0);
 
     useEffect(() => {
-      axios.get("/stock/get").then(Response =>{
+      axios.get("https://subo-sons-backend.onrender.com/stock/get").then(Response =>{
         console.log(Response.data)
         setData(Response.data)
       }).catch(err =>{
@@ -84,9 +84,12 @@ function StockList() {
                         <tr className="align-center">
                           <th>Book Title</th>
                           <th>Quantity</th>
-                          <th>Retail Price</th>
                           <th>Sale Price</th>
+                          <th>Whole Sale Price</th>
+                          <th>Purchase Price</th>
                           <th>Auther</th>
+                          <th>Publisher</th>
+                          <th>ISBN</th>
                           <th>Status</th>
                           <th>Action</th>
                          </tr> 
@@ -95,9 +98,13 @@ function StockList() {
 
                           <td>{stockDetails.book_title}</td>
                           <td>{stockDetails.quantity}</td>
-                          <td>{stockDetails.retail_price}</td>
                           <td>{stockDetails.sale_price}</td>
+                          <td>{stockDetails.whole_sale_price}</td>
+                          <td>{stockDetails.purchase_price}</td>
                           <td>{stockDetails.auther}</td>
+                          <td>{stockDetails.Publisher_name}</td>
+                          <td>{stockDetails.isbn}</td>
+                          
                           <td>
                             {/* <div className="badge badge-success badge-shadow" style={{padding:"8px"}}>
                               Active
@@ -106,13 +113,13 @@ function StockList() {
                              if (stockDetails.stock_status == 'Active'){
                               return (
                                 <div className="badge badge-success badge-shadow p-2">
-                                  {stockDetails.stock_status}
+                                  InStock
                                   </div>
                              )
                               }else{
                                 return(
                                   <div className="badge badge-danger badge-shadow p-2">
-                                {stockDetails.stock_status}
+                                OutStock
                                 </div>
                                 )
                               }

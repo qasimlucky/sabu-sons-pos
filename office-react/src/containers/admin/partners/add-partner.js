@@ -17,7 +17,7 @@ function AddPartner(props) {
     setData(newdata)
    // console.log(data)
   }
-  const url = "/partner/add"
+  const url = "https://subo-sons-backend.onrender.com/partner/add"
   function submit(e) {
     console.log(data)
     e.preventDefault();
