@@ -13,7 +13,7 @@ function Partner() {
   const [itemOffset, setItemOffset] = useState(0);
 
     useEffect(() => {
-      axios.get("/partner/get").then(Response =>{
+      axios.get("https://subo-sons-backend.onrender.com/partner/get").then(Response =>{
         console.log(Response.data)
         setData(Response.data)
       }).catch(err =>{
@@ -98,7 +98,7 @@ function Partner() {
                           <td>{partnerDetails.email}</td>
                           <td>{partnerDetails.phone_number}</td>
                           <td>{partnerDetails.account_balance}</td>
-                          <BsFillEyeFill onClick={()=>OpenTransactions(partnerDetails)}  style={{margin:"5px", fontSize:"20px",color:"green"}}/>
+                          <td><BsFillEyeFill onClick={()=>OpenTransactions(partnerDetails)}  style={{margin:"5px", fontSize:"20px",color:"green"}}/></td>          
                           <td>
                             <div className="badge badge-success badge-shadow p-2">
                               Active
