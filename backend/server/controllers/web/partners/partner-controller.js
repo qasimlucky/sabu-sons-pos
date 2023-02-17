@@ -79,7 +79,8 @@ const getPartnersTransaction = async function (req, res){
            for(const e of bb){
             if(e.partner_id == partner_id) {
                 var bill_id = e.bill_id;
-                var total_profit = e.total_profit;
+               // var total_profit = e.total_profit;
+               var total_profit  =0;
                 var created_at = e.created_at;
                 var orders = e.orders
                // console.log(orders)
@@ -88,17 +89,28 @@ const getPartnersTransaction = async function (req, res){
                     var bill_total  = b.bill_total
                     var bill_items = b.bill_items
                     var book_title_arr = []
-                    var percentage = []
+                    var percentage = [] 
+                    var each_book_profit = []
                     for (const c of bill_items) {
-                        book_title_arr.push(c.book_title) 
-                       //console.log(c)
+                         
+                       console.log(c)
                        var partners = c.partner
+                       /* if(partners){
+                        book_title_arr.push(c.book_title)
+                       } */
                        for(const d of partners){
                           //res.send(d)
                         //console.log(d)
                             if(d.partner_id== partner_id){
-                                console.log(d)
+                                //console.log(d)
                                 var partner_name = d.first_name
+                                var eachBookProfitAmount = (parseInt(c.whole_sale_price)-parseInt(c.purchase_price))
+                                console.log(parseInt(c.purchase_price))
+                                console.log(parseInt(c.whole_sale_price))
+                                var currentPartnerprofit = (((d.percentage)/100)*eachBookProfitAmount)
+                                book_title_arr.push(c.book_title)
+                                var total_profit = (total_profit+currentPartnerprofit);
+                                each_book_profit.push(currentPartnerprofit)
                                 percentage.push(d.percentage)
                                 //console.log(d.percentage) 
                             }
@@ -117,7 +129,8 @@ const getPartnersTransaction = async function (req, res){
                     bill_total : bill_total,
                     book_title_arr:book_title_arr,
                     percentage:percentage,
-                    partner_name:partner_name
+                    partner_name:partner_name,
+                    each_book_profit:each_book_profit
 
 
                 }

@@ -16,7 +16,7 @@ function PartnerTransaction() {
 
       useEffect(() => {
         axios
-        .post("/partner/transaction", {partner_id:partner_id})
+        .post("https://subo-sons-backend.onrender.com/partner/transaction", {partner_id:partner_id})
         .then(res => {
           console.log(res.data)
           setData(res.data)
@@ -55,9 +55,32 @@ function PartnerTransaction() {
     
                                     {/* <p><b style={{marginRight:"20px"}}>Name :</b> <p>{TransactionDetails.partner_name}</p> <b style={{marginRight:"20px"}}>Total profit</b>{TransactionDetails.total_profit}</p> */}
                                 </div>
+                                <div style={{border : "1px solid lightgray", marginBottom:"10px"}}></div>
                                 <div style={{display:"flex", flexWrap:"nowrap", width:"100%"}}>
-                                    <div><p><b style={{marginRight:"10px"}}>Book Title :</b>{(TransactionDetails.book_title_arr).join(', ')}</p></div>
-                                    <div style={{marginLeft:"50px"}}><p><b style={{marginRight:"10px"}}>percentage :</b>{(TransactionDetails.percentage).join(', ')}</p></div>
+                                    {/* <div><p><b style={{marginRight:"10px"}}>Book Title :</b>{(TransactionDetails.book_title_arr).join(', ')}</p></div> */}
+                                    
+                                    <div>
+                                      <div><p><b style={{marginRight:"10px"}}>Book Title</b></p></div>
+                                      { TransactionDetails && (TransactionDetails.book_title_arr).map(Details => (
+                                        <div >{Details}</div>
+                                      ))}
+                                    </div>
+                                    <div style={{marginLeft:"60px"}}>
+                                      <p><b style={{marginRight:"10px"}}>Percentage</b></p>
+                                      { TransactionDetails && (TransactionDetails.percentage).map(Details => (
+                                        <div style={{marginLeft:"20px"}}>{Details}%</div>
+                                      ))}
+                                    </div>
+                                    <div style={{marginLeft:"80px"}}>
+                                      <div><p><b >Profit</b></p></div>
+                                      { TransactionDetails && (TransactionDetails.each_book_profit).map(Details => (
+                                        <div >{Details}</div>
+                                      ))}
+                                    </div>
+
+
+                                    {/* <div style={{marginLeft:"50px"}}><p><b style={{marginRight:"10px"}}>percentage :</b>{(TransactionDetails.percentage).join(', ')}</p></div> */}
+
                                 </div>
     
                                 
