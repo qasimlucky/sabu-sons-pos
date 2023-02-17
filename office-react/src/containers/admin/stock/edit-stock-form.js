@@ -26,7 +26,7 @@ function EditStockForm(props) {
     }
 
   useEffect(() => {
-    axios.get("/stock/get/categories").then(Response =>{
+    axios.get("https://subo-sons-backend.onrender.com/stock/get/categories").then(Response =>{
       console.log(Response.data)
       setStockCategories(Response.data)
     }).catch(err =>{
@@ -35,7 +35,7 @@ function EditStockForm(props) {
     },[]);
 
     useEffect(() => {
-      axios.get("/partner/get").then(Response =>{
+      axios.get("https://subo-sons-backend.onrender.com/partner/get").then(Response =>{
         console.log(Response.data)
         setDbPartner(Response.data)
       }).catch(err =>{
@@ -50,10 +50,10 @@ function EditStockForm(props) {
     setData(newdata)
     console.log(data)
   }
-  const url = "/stock/edit"
+  const url = "https://subo-sons-backend.onrender.com/stock/edit"
 
   function submit(e){
-    //console.log(data)
+    console.log(ispartner)
     if(ispartner){
       var submitData = {
         ...data,
@@ -82,6 +82,7 @@ function EditStockForm(props) {
           text: 'Stock Updated!!!!',
         })
         console.log(res.data)
+        navigate("/allstock")
       }).catch(err =>{
         Swal.fire({
           icon: 'error',
@@ -89,6 +90,7 @@ function EditStockForm(props) {
           text: 'Something went wrong!',
         })
           console.log(err)
+          navigate("/allstock")
         })
 
 } 
@@ -117,7 +119,7 @@ function EditStockForm(props) {
         console.log(stockpartner)
         setStockPartner([...stockpartner])
       }
-  
+      setIsPartner(true)
     }
   
     function DeleteFromArr(partnerDetails){
@@ -172,45 +174,30 @@ function EditStockForm(props) {
                     </div>
                     <div class="form-group col-3">
                           <label for="">ISBN</label>
-                          <input onChange = {(e) =>handle(e)} id="isbn" type="text" class="form-control" name="isbn" placeholder="Book Title"  />
+                          <input onChange = {(e) =>handle(e)} id="isbn" type="text" class="form-control" name="isbn" placeholder="ISBN" defaultValue={stockData.isbn} />
                         </div>
                         <div class="form-group col-3">
                           <label for="">Publisher Name</label>
-                          <input onChange = {(e) =>handle(e)} id="purchase_price" type="text" class="form-control" name="purchase_price" placeholder="Book Title"  />
+                          <input onChange = {(e) =>handle(e)} id="Publisher_name" type="text" class="form-control" name="Publisher_name" placeholder="Publisher Name" defaultValue={stockData.Publisher_name} />
                         </div>
                     <div class="form-group col-3">
                       <label for="">Quantity</label>
                       <input onChange = {(e) =>handle(e)} id="quantity" type="text" class="form-control" name="quantity" placeholder="Quantity" defaultValue={stockData.quantity}/>
                     </div>
                   </div>
-                  <label  className="badge badge-primary badge-shadow" style={{padding:"8px"}}>Price Info</label>
-                  <div class="row">
-                        <div class="form-group col-4">
-                            <label for="">purchase price</label>
-                            <input onChange = {(e) =>handle(e)}  id="purchase_price" type="text" class="form-control" name="purchase_price" placeholder="Sale Price" defaultValue={stockData.purchase_price}/>
-                        </div>
-                        <div class="form-group col-4">
-                            <label for="">Whole Sale Price</label>
-                            <input onChange = {(e) =>handle(e)} id="whole_sale_price" type="text" class="form-control" name="whole_sale_price"  placeholder="Whole Sale Price" defaultValue={stockData.whole_sale_price}/>
-                        </div>
-                        <div class="form-group col-4">
-                            <label for="">Sale Price</label>
-                            <input onChange = {(e) =>handle(e)}  id="sale_price" type="text" class="form-control" name="sale_price" placeholder="Sale Price" defaultValue={stockData.sale_price}/>
-                        </div>  
-                      </div>
                   <label  className="badge badge-primary badge-shadow" style={{padding:"8px"}}>Book Info</label>
                   <div class="row">
                         <div class="form-group col-3">
                           <label>Auther</label>
-                          <input onChange = {(e) =>handle(e)} id="auther" type="text" class="form-control" name="auther" placeholder="auther" defaultValue={stockData.auther}/>
+                          <input onChange = {(e) =>handle(e)} id="auther" type="text" class="form-control" name="auther" placeholder="Auther" defaultValue={stockData.auther}/>
                         </div>
                         <div class="form-group col-3">
                           <label for="">Description</label>
-                          <input onChange = {(e) =>handle(e)}  id="description" type="text" class="form-control" name="description" placeholder="Description" defaultValue={stockData.description}/>
+                          <input onChange = {(e) =>handle(e)}  id="description" type="text" class="form-control" name="Description" placeholder="Description" defaultValue={stockData.description}/>
                         </div>
                         <div class="form-group col-3">
                           <label for="">Record Level</label>
-                          <input onChange = {(e) =>handle(e)}  id="record_level" type="text" class="form-control" name="record_level" placeholder="any number" defaultValue={stockData.record_level}/>
+                          <input onChange = {(e) =>handle(e)}  id="record_level" type="text" class="form-control" name="record_level" placeholder="Number" defaultValue={stockData.record_level}/>
                         </div>
                         <div class="form-group col-3">
                         <label for="">Catagories</label>
@@ -223,8 +210,22 @@ function EditStockForm(props) {
                                       </datalist>
                             </div>
                         </div>
-                      </div>
-                  
+                  </div>
+                  <label  className="badge badge-primary badge-shadow" style={{padding:"8px"}}>Price Info</label>
+                  <div class="row">
+                        <div class="form-group col-4">
+                            <label for="">purchase price</label>
+                            <input onChange = {(e) =>handle(e)}  id="purchase_price" type="text" class="form-control" name="purchase_price" placeholder="Purchase Price" defaultValue={stockData.purchase_price}/>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="">Whole Sale Price</label>
+                            <input onChange = {(e) =>handle(e)} id="whole_sale_price" type="text" class="form-control" name="whole_sale_price"  placeholder="Whole Sale Price" defaultValue={stockData.whole_sale_price}/>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="">Sale Price</label>
+                            <input onChange = {(e) =>handle(e)}  id="sale_price" type="text" class="form-control" name="sale_price" placeholder="Sale Price" defaultValue={stockData.sale_price}/>
+                        </div>  
+                  </div>
                       <div class="row">
                       <div class="form-group col-4"></div>
                         <div class="form-group col-4">

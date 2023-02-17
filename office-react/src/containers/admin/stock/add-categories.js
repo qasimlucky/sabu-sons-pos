@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import Sidebar from "../Sidebar";
 import Navbar from "../Navbar";
@@ -7,7 +8,7 @@ import withReactContent from 'sweetalert2-react-content'
 
 
 function AddCategories(props) {
-
+  let navigate = useNavigate();
   const MySwal = withReactContent(Swal)
   const [data, setData] = useState({})
 
@@ -17,7 +18,7 @@ function AddCategories(props) {
     setData(newdata)
    // console.log(data)
   }
-  const url = "/stock/add/categories"
+  const url = "https://subo-sons-backend.onrender.com/stock/add/categories"
   function submit(e) {
     console.log(data)
     e.preventDefault();
@@ -28,10 +29,11 @@ function AddCategories(props) {
         Swal.fire({
           icon: 'success',
           title: 'Congratulations',
-          text: 'New Partner  Add!!!!',
+          text: 'New Categories  Add!!!!',
           showConfirmButton: false,
           timer: 1500
         })
+        navigate("/categories")
       }).catch(err =>{
         Swal.fire({
           icon: 'error',
@@ -41,6 +43,7 @@ function AddCategories(props) {
           timer: 1500
         })
           console.log(err)
+          navigate("/categories")
         })
 
   }
@@ -63,7 +66,7 @@ function AddCategories(props) {
                     <form onSubmit={(e) => submit(e)} method="HTTP_METHOD" enctype="multipart/form-data">
 
 
-                      <label className="badge badge-primary badge-shadow" style={{ padding: "8px" }}>Partner Details</label>
+                      <label className="badge badge-primary badge-shadow" style={{ padding: "8px" }}>Details</label>
                       <div class="row">
                         <div class="form-group col-3"></div>
                         <div class="form-group col-6">

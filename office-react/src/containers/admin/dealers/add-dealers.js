@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import Sidebar from "../Sidebar";
 import Navbar from "../Navbar";
@@ -7,7 +8,7 @@ import withReactContent from 'sweetalert2-react-content'
 
 
 function AddDealer(props) {
-
+  let navigate = useNavigate();
   const MySwal = withReactContent(Swal)
   const [data, setData] = useState({
     first_name: "",
@@ -23,7 +24,7 @@ function AddDealer(props) {
     setData(newdata)
    // console.log(data)
   }
-  const url = "/dealer/add"
+  const url = "https://subo-sons-backend.onrender.com/dealer/add"
   function submit(e) {
     console.log(data)
     e.preventDefault();
@@ -38,6 +39,7 @@ function AddDealer(props) {
           showConfirmButton: false,
           timer: 1500
         })
+        navigate("/alldealer")
       }).catch(err =>{
         Swal.fire({
           icon: 'error',
